@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destino Random</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f766e;
+      --primary-dark: #0d5c56;
+      --accent: #f59e0b;
+      --bg: #f0fdfa;
+      --card: #ffffff;
+      --text: #134e4a;
+      --text-light: #5eead4;
+      --shadow: 0 20px 40px -15px rgba(15, 118, 110, 0.15);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #99f6e4 100%);
+      min-height: 100vh;
+      color: var(--text);
+      overflow-x: hidden;
+      position: relative;
+    }
+    /* ===== ICONOS DECORATIVOS FLOTANTES ===== */
+    .floating-icons {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .float-icon {
+      position: absolute;
+      font-size: 1.8rem;
+      opacity: 0.18;
+      animation: floatAround linear infinite;
+      filter: drop-shadow(0 4px 8px rgba(15,118,110,0.15));
+      user-select: none;
+    }
+    @keyframes floatAround {
+      0%   { transform: translateY(0) translateX(0) rotate(0deg); }
+      25%  { transform: translateY(-18px) translateX(8px) rotate(5deg); }
+      50%  { transform: translateY(-8px) translateX(-6px) rotate(-4deg); }
+      75%  { transform: translateY(-22px) translateX(4px) rotate(3deg); }
+      100% { transform: translateY(0) translateX(0) rotate(0deg); }
+    }
+    header {
+      text-align: center;
+      padding: 2.2rem 1.5rem 1rem;
+      animation: fadeDown 0.8s ease;
+      position: relative;
+      z-index: 2;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 6vw, 3.4rem);
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+    header p {
+      font-size: 1.05rem;
+      color: #0f766e;
+      opacity: 0.85;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 1.5rem 3rem;
+      position: relative;
+      z-index: 2;
+    }
+    /* ===== ESTADÍSTICAS RÁPIDAS ===== */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.8rem;
+      animation: fadeUp 0.8s ease 0.15s both;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 0.9rem 1.4rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      min-width: 140px;
+    }
+    .stat-card .number {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+    .stat-card .label {
+      font-size: 0.8rem;
+      color: #0f766e;
+      opacity: 0.8;
+      margin-top: 0.15rem;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      justify-content: center;
+      margin: 0 0 1.8rem;
+      animation: fadeUp 0.8s ease 0.2s both;
+    }
+    .filter-btn {
+      background: white;
+      border: 2px solid #99f6e4;
+      color: var(--primary);
+      padding: 0.55rem 1.3rem;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .filter-btn:hover { background: #ccfbf1; transform: translateY(-2px); }
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 8px 20px -6px rgba(15, 118, 110, 0.4);
+    }
+    .generate-btn {
+      display: block;
+      width: 100%;
+      max-width: 340px;
+      margin: 0 auto 2.5rem;
+      background: linear-gradient(135deg, var(--primary), #14b8a6);
+      color: white;
+      border: none;
+      padding: 1.1rem 2rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: 60px;
+      cursor: pointer;
+      box-shadow: 0 12px 30px -8px rgba(15, 118, 110, 0.45);
+      transition: all 0.3s ease;
+      animation: fadeUp 0.8s ease 0.3s both;
+    }
+    .generate-btn:hover {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 18px 35px -8px rgba(15, 118, 110, 0.5);
+    }
+    .generate-btn:active { transform: translateY(-1px) scale(0.98); }
+    .generate-btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .result {
+      background: var(--card);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      position: relative;
+    }
+    .result.show { opacity: 1; transform: translateY(0); }
+    .result img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s ease;
+    }
+    .result:hover img { transform: scale(1.04); }
+    .result-content {
+      padding: 1.8rem 1.8rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .result-content .category {
+      display: inline-block;
+      background: #ccfbf1;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3rem 0.9rem;
+      border-radius: 50px;
+      margin-bottom: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .result-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      color: var(--primary-dark);
+      margin-bottom: 0.8rem;
+      line-height: 1.2;
+    }
+    .result-content .quote {
+      font-size: 1.05rem;
+      font-style: italic;
+      color: #0f766e;
+      opacity: 0.9;
+      line-height: 1.5;
+      position: relative;
+      padding: 0 0.5rem;
+      margin-bottom: 1.2rem;
+    }
+    .result-content .quote::before {
+      content: '"';
+      font-size: 2.5rem;
+      color: #99f6e4;
+      position: absolute;
+      left: -5px;
+      top: -15px;
+      font-family: Georgia, serif;
+    }
+    .tips {
+      background: #f0fdfa;
+      border-radius: 16px;
+      padding: 1rem 1.2rem;
+      margin: 0 0 1.4rem;
+      text-align: left;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .tips strong { color: var(--primary-dark); }
+    .actions {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: white;
+      border: 2px solid #99f6e4;
+      color: var(--primary);
+      padding: 0.55rem 1.15rem;
+      border-radius: 50px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .action-btn:hover { background: #ccfbf1; transform: translateY(-2px); }
+    .action-btn.favorited {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #b45309;
+    }
+    .action-btn.visited {
+      background: #d1fae5;
+      border-color: #10b981;
+      color: #047857;
+    }
+    .heart { font-size: 1.15rem; transition: transform 0.2s; }
+    .action-btn.favorited .heart { transform: scale(1.2); }
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 3rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+    .loading.show { display: block; }
+    .spinner {
+      width: 42px; height: 42px;
+      border: 4px solid #99f6e4;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      animation: spin 0.8s linear infinite;
+    }
+    .section {
+      max-width: 520px;
+      margin: 0 auto 2.2rem;
+      background: white;
+      border-radius: 20px;
+      padding: 1.4rem 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .section h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.35rem;
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+    .chip {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      color: var(--primary);
+      padding: 0.4rem 0.9rem;
+      border-radius: 50px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .chip:hover { background: #ccfbf1; transform: translateY(-1px); }
+    .chip .remove {
+      background: none;
+      border: none;
+      color: #0f766e;
+      font-size: 1rem;
+      cursor: pointer;
+      opacity: 0.6;
+      padding: 0;
+      line-height: 1;
+    }
+    .chip .remove:hover { opacity: 1; color: #b91c1c; }
+    /* ===== YA VIAJÉ + FOTOS ===== */
+    .visited-item {
+      background: #f0fdfa;
+      border: 1px solid #99f6e4;
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 0.9rem;
+    }
+    .visited-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+    .visited-name { font-weight: 600; color: var(--primary-dark); }
+    .visited-photos {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.7rem;
+    }
+    .visited-photo {
+      width: 70px; height: 70px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 2px solid #99f6e4;
+    }
+    .add-photo-btn {
+      background: white;
+      border: 2px dashed #99f6e4;
+      color: var(--primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .add-photo-btn:hover { background: #ccfbf1; }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.9rem;
+      color: #0f766e;
+      opacity: 0.7;
+      position: relative;
+      z-index: 2;
+    }
+    /* Animación de aviones al favorito */
+    .planes-container {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 9999; overflow: hidden;
+    }
+    .plane {
+      position: absolute;
+      font-size: 1.9rem;
+      opacity: 0;
+      filter: drop-shadow(0 4px 10px rgba(15, 118, 110, 0.25));
+      will-change: transform, opacity;
+      transform: translate(-50%, -50%) scale(0.15);
+    }
+    .plane.explode {
+      animation: planeExplode var(--duration) cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    }
+    @keyframes planeExplode {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.15) rotate(0deg); }
+      12% { opacity: 1; transform: translate(-50%, -50%) scale(1.05) rotate(calc(var(--spin) * 0.15)); }
+      55% { opacity: 1; transform: translate(calc(-50% + var(--dx) * 0.65), calc(-50% + var(--dy) * 0.65)) scale(1) rotate(calc(var(--spin) * 0.7)); }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.55) rotate(var(--spin)); }
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 600px) {
+      .result img { height: 260px; }
+      .result-content { padding: 1.4rem; }
+      .result-content h2 { font-size: 1.6rem; }
+      .filters { gap: 0.5rem; }
+      .filter-btn { padding: 0.45rem 1rem; font-size: 0.88rem; }
+      .plane { font-size: 1.5rem; }
+      .stat-card { min-width: 110px; padding: 0.7rem 1rem; }
+      .stat-card .number { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Iconos decorativos flotantes -->
+  <div class="floating-icons" id="floatingIcons"></div>
+
+  <header>
+    <h1>Destino Random</h1>
+    <p>Descubre tu próxima aventura con un solo clic</p>
+  </header>
+
+  <div class="container">
+    <!-- Estadísticas rápidas -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="number" id="statDestinos">35</div>
+        <div class="label">Destinos disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="statFavoritos">0</div>
+        <div class="label">Tus favoritos</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="statUltimo" style="font-size:1rem; line-height:1.3;">—</div>
+        <div class="label">Último destino visto</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Todos</button>
+      <button class="filter-btn" data-filter="playa">Playa</button>
+      <button class="filter-btn" data-filter="montaña">Montaña</button>
+      <button class="filter-btn" data-filter="ciudad">Ciudad</button>
+      <button class="filter-btn" data-filter="naturaleza">Naturaleza</button>
+    </div>
+
+    <button class="generate-btn" id="generateBtn">¡Sorpréndeme!</button>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      Buscando tu destino perfecto...
+    </div>
+
+    <div class="result" id="result">
+      <img id="resultImg" src="" alt="Destino">
+      <div class="result-content">
+        <span class="category" id="resultCategory"></span>
+        <h2 id="resultName"></h2>
+        <p class="quote" id="resultQuote"></p>
+        <div class="tips" id="resultTips"></div>
+        <div class="actions">
+          <button class="action-btn" id="favBtn">
+            <span class="heart">🤍</span> Favorito
+          </button>
+          <button class="action-btn" id="visitBtn">
+            ✈️ Ya viajé
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section" id="historySection" style="display:none;">
+      <h3>🕐 Ya te salieron…</h3>
+      <div class="chips" id="historyChips"></div>
+    </div>
+
+    <div class="section" id="favSection" style="display:none;">
+      <h3>❤️ Mis destinos favoritos</h3>
+      <div class="chips" id="favChips"></div>
+    </div>
+
+    <div class="section" id="visitedSection" style="display:none;">
+      <h3>🗺️ Lugares que ya visitaste</h3>
+      <div id="visitedList"></div>
+    </div>
+  </div>
+
+  <footer>
+    Destino Random · Proyecto web interactivo · 2025
+  </footer>
+
+  <!-- Contenedor de aviones para la animación -->
+  <div class="planes-container" id="planesContainer"></div>
+
+  <script>
+    // ====================== DESTINOS ======================
+    const destinos = [
+      { nombre: "Santorini, Grecia", categoria: "playa", imagen: "santorini-grecia.jpg", frase: "Donde el blanco y el azul se encuentran con el cielo.", epoca: "Abril – Octubre", moneda: "Euro (€)", idioma: "Griego" },
+      { nombre: "Bali, Indonesia", categoria: "playa", imagen: "bali-indonesia.jpg", frase: "Isla de dioses, playas y atardeceres eternos.", epoca: "Abril – Octubre (estación seca)", moneda: "Rupia indonesia (IDR)", idioma: "Indonesio / Inglés" },
+      { nombre: "Maldivas", categoria: "playa", imagen: "maldivas.jpg", frase: "Aguas cristalinas que parecen de otro planeta.", epoca: "Noviembre – Abril", moneda: "Rufiyaa (MVR) / Dólar", idioma: "Dhivehi / Inglés" },
+      { nombre: "Amalfi, Italia", categoria: "playa", imagen: "amalfi-italia.jpg", frase: "Acantilados, limones y el Mediterráneo a tus pies.", epoca: "Mayo – Septiembre", moneda: "Euro (€)", idioma: "Italiano" },
+      { nombre: "Patagonia, Argentina", categoria: "montaña", imagen: "patagonia-argentina.jpg", frase: "Donde la tierra termina y la aventura comienza.", epoca: "Noviembre – Marzo", moneda: "Peso argentino (ARS)", idioma: "Español" },
+      { nombre: "Alpes Suizos", categoria: "montaña", imagen: "alpes-suizos.jpg", frase: "Picos nevados que tocan las nubes.", epoca: "Diciembre – Marzo (nieve) / Junio – Septiembre", moneda: "Franco suizo (CHF)", idioma: "Alemán / Francés / Italiano" },
+      { nombre: "Machu Picchu, Perú", categoria: "montaña", imagen: "machu-picchu-peru.jpg", frase: "La ciudad perdida de los Incas te espera.", epoca: "Mayo – Septiembre (estación seca)", moneda: "Sol peruano (PEN)", idioma: "Español / Quechua" },
+      { nombre: "Banff, Canadá", categoria: "montaña", imagen: "banff-canada.jpg", frase: "Lagos turquesa rodeados de montañas majestuosas.", epoca: "Junio – Septiembre", moneda: "Dólar canadiense (CAD)", idioma: "Inglés / Francés" },
+      { nombre: "Tokio, Japón", categoria: "ciudad", imagen: "tokio-japon.jpg", frase: "Tradición milenaria y futuro en una sola ciudad.", epoca: "Marzo – Mayo y Octubre – Noviembre", moneda: "Yen (¥)", idioma: "Japonés" },
+      { nombre: "París, Francia", categoria: "ciudad", imagen: "paris-francia.jpg", frase: "La ciudad del amor nunca decepciona.", epoca: "Abril – Junio y Septiembre – Octubre", moneda: "Euro (€)", idioma: "Francés" },
+      { nombre: "Nueva York, USA", categoria: "ciudad", imagen: "nueva-york-usa.jpg", frase: "La ciudad que nunca duerme.", epoca: "Abril – Junio y Septiembre – Noviembre", moneda: "Dólar (USD)", idioma: "Inglés" },
+      { nombre: "Barcelona, España", categoria: "ciudad", imagen: "barcelona-espana.jpg", frase: "Arquitectura, playa y vida en cada esquina.", epoca: "Mayo – Junio y Septiembre – Octubre", moneda: "Euro (€)", idioma: "Español / Catalán" },
+      { nombre: "Selva Amazónica", categoria: "naturaleza", imagen: "selva-amazonica.jpg", frase: "El pulmón del mundo te invita a explorarlo.", epoca: "Junio – Noviembre (menos lluvias)", moneda: "Varía (Brasil, Perú, Colombia…)", idioma: "Español / Portugués" },
+      { nombre: "Islandia", categoria: "naturaleza", imagen: "islandia.jpg", frase: "Cascadas, géiseres y auroras boreales.", epoca: "Junio – Agosto (verano) / Sept – Marzo (auroras)", moneda: "Corona islandesa (ISK)", idioma: "Islandés / Inglés" },
+      { nombre: "Costa Rica", categoria: "naturaleza", imagen: "costa-rica.jpg", frase: "Pura vida entre volcanes y selvas.", epoca: "Diciembre – Abril (estación seca)", moneda: "Colón costarricense (CRC)", idioma: "Español" },
+      { nombre: "Noruega - Fiordos", categoria: "naturaleza", imagen: "noruega-fiordos.jpg", frase: "Paisajes que parecen sacados de un sueño.", epoca: "Mayo – Septiembre", moneda: "Corona noruega (NOK)", idioma: "Noruego / Inglés" },
+      { nombre: "Taj Mahal, India", categoria: "ciudad", imagen: "taj-mahal-india.jpg", frase: "El monumento al amor eterno bajo el sol de la India.", epoca: "Octubre – Marzo", moneda: "Rupia india (INR)", idioma: "Hindi / Inglés" },
+      { nombre: "Antártida", categoria: "naturaleza", imagen: "antartida.jpg", frase: "El último continente salvaje de la Tierra.", epoca: "Noviembre – Marzo", moneda: "— (expediciones)", idioma: "Inglés (principal)" },
+      { nombre: "Cañón del Antílope, Arizona", categoria: "naturaleza", imagen: "canon-del-antilope-arizona.jpg", frase: "Luz y piedra danzando en perfecta armonía.", epoca: "Marzo – Mayo y Septiembre – Noviembre", moneda: "Dólar (USD)", idioma: "Inglés" },
+      { nombre: "Desierto de Atacama, Chile", categoria: "naturaleza", imagen: "desierto-de-atacama-chile.jpg", frase: "El desierto más árido del mundo te espera.", epoca: "Todo el año (mejor marzo – noviembre)", moneda: "Peso chileno (CLP)", idioma: "Español" },
+      { nombre: "Bosque de Bambú de Arashiyama, Japón", categoria: "naturaleza", imagen: "bosque-bambu-arashiyama-japon.jpg", frase: "Un túnel verde que parece sacado de un cuento.", epoca: "Marzo – Mayo y Octubre – Noviembre", moneda: "Yen (¥)", idioma: "Japonés" },
+      { nombre: "Avenida de los Baobabs, Madagascar", categoria: "naturaleza", imagen: "avenida-baobabs-madagascar.jpg", frase: "Árboles milenarios que guardan secretos antiguos.", epoca: "Abril – Noviembre", moneda: "Ariary (MGA)", idioma: "Malgache / Francés" },
+      { nombre: "Fernando de Noronha, Brasil", categoria: "playa", imagen: "fernando-de-noronha-brasil.jpg", frase: "Paraíso brasileño de playas vírgenes y aguas turquesas.", epoca: "Agosto – Diciembre", moneda: "Real brasileño (BRL)", idioma: "Portugués" },
+      { nombre: "Pirámides de Giza, Egipto", categoria: "ciudad", imagen: "piramides-de-giza-egipto.jpg", frase: "Guardianes eternos de la historia del mundo.", epoca: "Octubre – Abril", moneda: "Libra egipcia (EGP)", idioma: "Árabe / Inglés" },
+      { nombre: "Petra, Jordania", categoria: "ciudad", imagen: "petra-jordania.jpg", frase: "La ciudad rosa esculpida en la roca del desierto.", epoca: "Marzo – Mayo y Septiembre – Noviembre", moneda: "Dinar jordano (JOD)", idioma: "Árabe / Inglés" },
+      { nombre: "Jamaica", categoria: "playa", imagen: "jamaica.jpg", frase: "Ritmo, playas y el espíritu del Caribe.", epoca: "Diciembre – Abril", moneda: "Dólar jamaicano (JMD)", idioma: "Inglés" },
+      { nombre: "Belice", categoria: "playa", imagen: "belice.jpg", frase: "Arrecifes de coral y selva tropical en un solo destino.", epoca: "Diciembre – Abril", moneda: "Dólar beliceño (BZD)", idioma: "Inglés / Español" },
+      { nombre: "Río de Janeiro, Brasil", categoria: "ciudad", imagen: "rio-de-janeiro-brasil.jpg", frase: "Donde la montaña abraza el mar y la alegría nunca termina.", epoca: "Diciembre – Marzo", moneda: "Real brasileño (BRL)", idioma: "Portugués" },
+      { nombre: "Playa del Carmen, México", categoria: "playa", imagen: "playa-del-carmen-mexico.jpg", frase: "Arena blanca, mar turquesa y magia maya.", epoca: "Noviembre – Abril", moneda: "Peso mexicano (MXN)", idioma: "Español" },
+      { nombre: "Dubái, Emiratos Árabes Unidos", categoria: "ciudad", imagen: "dubai-emiratos.jpg", frase: "Lujo, rascacielos y desierto en perfecta fusión.", epoca: "Noviembre – Marzo", moneda: "Dírham (AED)", idioma: "Árabe / Inglés" },
+      { nombre: "Isla de Pascua, Chile", categoria: "naturaleza", imagen: "isla-de-pascua-chile.jpg", frase: "Los moáis vigilan el misterio del Pacífico.", epoca: "Octubre – Abril", moneda: "Peso chileno (CLP)", idioma: "Español / Rapa Nui" },
+      { nombre: "Bora Bora, Polinesia Francesa", categoria: "playa", imagen: "bora-bora-polinesia.jpg", frase: "El paraíso sobre el agua más hermoso del mundo.", epoca: "Mayo – Octubre", moneda: "Franco CFP (XPF)", idioma: "Francés / Tahitiano" },
+      { nombre: "Cataratas de Iguazú", categoria: "naturaleza", imagen: "cataratas-iguazu.jpg", frase: "La fuerza del agua en su máxima expresión.", epoca: "Marzo – Agosto", moneda: "Peso argentino / Real brasileño", idioma: "Español / Portugués" },
+      { nombre: "Monte Fuji, Japón", categoria: "montaña", imagen: "monte-fuji-japon.jpg", frase: "La montaña sagrada que inspira a todo un país.", epoca: "Julio – Septiembre (temporada de trekking)", moneda: "Yen (¥)", idioma: "Japonés" },
+      { nombre: "Hawái, USA", categoria: "playa", imagen: "hawai.jpg", frase: "Volcanes, olas perfectas y aloha eterno.", epoca: "Abril – Junio y Septiembre – Noviembre", moneda: "Dólar (USD)", idioma: "Inglés / Hawaiano" }
+    ];
+
+    // ====================== ELEMENTOS ======================
+    const generateBtn = document.getElementById("generateBtn");
+    const result = document.getElementById("result");
+    const loading = document.getElementById("loading");
+    const resultImg = document.getElementById("resultImg");
+    const resultName = document.getElementById("resultName");
+    const resultQuote = document.getElementById("resultQuote");
+    const resultCategory = document.getElementById("resultCategory");
+    const resultTips = document.getElementById("resultTips");
+    const favBtn = document.getElementById("favBtn");
+    const visitBtn = document.getElementById("visitBtn");
+    const filterBtns = document.querySelectorAll(".filter-btn");
+    const historySection = document.getElementById("historySection");
+    const historyChips = document.getElementById("historyChips");
+    const favSection = document.getElementById("favSection");
+    const favChips = document.getElementById("favChips");
+    const visitedSection = document.getElementById("visitedSection");
+    const visitedList = document.getElementById("visitedList");
+    const planesContainer = document.getElementById("planesContainer");
+
+    let filtroActual = "all";
+    let destinoActual = null;
+
+    // ====================== STORAGE ======================
+    const memoryStore = { historial: [], favoritos: [], visitados: {} };
+    function canUseLocalStorage() {
+      try {
+        const test = "__test__";
+        localStorage.setItem(test, test);
+        localStorage.removeItem(test);
+        return true;
+      } catch (e) { return false; }
+    }
+    const useLS = canUseLocalStorage();
+    function get(key, def) {
+      if (useLS) {
+        try { return JSON.parse(localStorage.getItem(key)) ?? def; }
+        catch { return memoryStore[key] || def; }
+      }
+      return memoryStore[key] || def;
+    }
+    function set(key, val) {
+      if (useLS) {
+        try { localStorage.setItem(key, JSON.stringify(val)); }
+        catch { memoryStore[key] = val; }
+      } else { memoryStore[key] = val; }
+    }
+    function getHistorial() { return get("destinoHistorial", []); }
+    function setHistorial(arr) { set("destinoHistorial", arr.slice(0, 8)); }
+    function getFavoritos() { return get("destinoFavoritos", []); }
+    function setFavoritos(arr) { set("destinoFavoritos", arr); }
+    function getVisitados() { return get("destinoVisitados", {}); }
+    function setVisitados(obj) { set("destinoVisitados", obj); }
+
+    // ====================== ICONOS FLOTANTES ======================
+    function createFloatingIcons() {
+      const icons = ["✈️", "🧳", "🧭", "☁️", "🌍", "🗺️", "🏝️", "⛰️", "🛫", "☁️"];
+      const container = document.getElementById("floatingIcons");
+      for (let i = 0; i < 14; i++) {
+        const el = document.createElement("div");
+        el.className = "float-icon";
+        el.textContent = icons[i % icons.length];
+        el.style.left = (i % 2 === 0 ? Math.random() * 12 : 88 + Math.random() * 10) + "%";
+        el.style.top = (5 + Math.random() * 90) + "%";
+        el.style.animationDuration = (12 + Math.random() * 18) + "s";
+        el.style.animationDelay = (Math.random() * 8) + "s";
+        el.style.fontSize = (1.4 + Math.random() * 1.2) + "rem";
+        container.appendChild(el);
+      }
+    }
+
+    // ====================== ANIMACIÓN AVIONES ======================
+    function launchPlanes() {
+      const numPlanes = 14;
+      const emojis = ["✈️", "🛫", "🛬", "✈️", "🛫"];
+      const btnRect = favBtn.getBoundingClientRect();
+      const originX = btnRect.left + btnRect.width / 2;
+      const originY = btnRect.top + btnRect.height / 2;
+      for (let i = 0; i < numPlanes; i++) {
+        const plane = document.createElement("div");
+        plane.className = "plane";
+        plane.textContent = emojis[i % emojis.length];
+        const angle = (i / numPlanes) * Math.PI * 2 + (Math.random() - 0.5) * 0.55;
+        const distance = 220 + Math.random() * 280;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance - 30;
+        const spin = (Math.random() > 0.5 ? 1 : -1) * (50 + Math.random() * 110);
+        const duration = 1.4 + Math.random() * 0.7;
+        const delay = i * 40;
+        plane.style.left = `${originX}px`;
+        plane.style.top = `${originY}px`;
+        plane.style.setProperty("--dx", `${dx}px`);
+        plane.style.setProperty("--dy", `${dy}px`);
+        plane.style.setProperty("--spin", `${spin}deg`);
+        plane.style.setProperty("--duration", `${duration}s`);
+        plane.style.animationDelay = `${delay}ms`;
+        planesContainer.appendChild(plane);
+        requestAnimationFrame(() => plane.classList.add("explode"));
+        setTimeout(() => plane.remove(), delay + duration * 1000 + 100);
+      }
+    }
+
+    // ====================== RENDER ======================
+    function updateStats() {
+      const favs = getFavoritos();
+      const visitados = getVisitados();
+      const disponibles = destinos.length - Object.keys(visitados).length;
+      document.getElementById("statDestinos").textContent = Math.max(0, disponibles);
+      document.getElementById("statFavoritos").textContent = favs.length;
+      const hist = getHistorial();
+      document.getElementById("statUltimo").textContent = hist[0] ? hist[0].split(",")[0] : "—";
+    }
+
+    function renderHistorial() {
+      const hist = getHistorial();
+      if (hist.length === 0) { historySection.style.display = "none"; return; }
+      historySection.style.display = "block";
+      historyChips.innerHTML = hist.map(n => `<div class="chip">${n}</div>`).join("");
+    }
+
+    function renderFavoritos() {
+      const favs = getFavoritos();
+      if (favs.length === 0) { favSection.style.display = "none"; return; }
+      favSection.style.display = "block";
+      favChips.innerHTML = favs.map(nombre => `
+        <div class="chip">
+          ${nombre}
+          <button class="remove" data-nombre="${nombre}" title="Quitar de favoritos">×</button>
+        </div>`).join("");
+      favChips.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const nombre = btn.dataset.nombre;
+          let favs = getFavoritos().filter(n => n !== nombre);
+          setFavoritos(favs);
+          renderFavoritos();
+          updateStats();
+          if (destinoActual && destinoActual.nombre === nombre) updateFavButton();
+        });
+      });
+    }
+
+    function renderVisitados() {
+      const visitados = getVisitados();
+      const nombres = Object.keys(visitados);
+      if (nombres.length === 0) { visitedSection.style.display = "none"; return; }
+      visitedSection.style.display = "block";
+      visitedList.innerHTML = nombres.map(nombre => {
+        const fotos = visitados[nombre] || [];
+        return `
+          <div class="visited-item">
+            <div class="visited-header">
+              <span class="visited-name">${nombre}</span>
+              <button class="remove" data-nombre="${nombre}" title="Quitar de visitados" style="font-size:1.1rem;">×</button>
+            </div>
+            <div class="visited-photos">
+              ${fotos.map(f => `<img src="${f}" class="visited-photo" alt="recuerdo">`).join("")}
+            </div>
+            <label class="add-photo-btn">
+              + Agregar foto de recuerdo
+              <input type="file" accept="image/*" data-nombre="${nombre}" hidden class="photo-input">
+            </label>
+          </div>`;
+      }).join("");
+      visitedList.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const nombre = btn.dataset.nombre;
+          const visitados = getVisitados();
+          delete visitados[nombre];
+          setVisitados(visitados);
+          renderVisitados();
+          updateStats();
+          if (destinoActual && destinoActual.nombre === nombre) updateVisitButton();
+        });
+      });
+      visitedList.querySelectorAll(".photo-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const nombre = input.dataset.nombre;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const visitados = getVisitados();
+            if (!visitados[nombre]) visitados[nombre] = [];
+            visitados[nombre].push(ev.target.result);
+            setVisitados(visitados);
+            renderVisitados();
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+
+    function updateFavButton() {
+      if (!destinoActual) return;
+      const isFav = getFavoritos().includes(destinoActual.nombre);
+      favBtn.classList.toggle("favorited", isFav);
+      favBtn.innerHTML = isFav
+        ? `<span class="heart">❤️</span> Favorito`
+        : `<span class="heart">🤍</span> Favorito`;
+    }
+
+    function updateVisitButton() {
+      if (!destinoActual) return;
+      const visitados = getVisitados();
+      const isVisited = !!visitados[destinoActual.nombre];
+      visitBtn.classList.toggle("visited", isVisited);
+      visitBtn.innerHTML = isVisited ? "✅ Ya viajé" : "✈️ Ya viajé";
+    }
+
+    // ====================== FILTROS ======================
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        filtroActual = btn.dataset.filter;
+      });
+    });
+
+    // ====================== GENERAR ======================
+    generateBtn.addEventListener("click", () => {
+      let lista = filtroActual === "all"
+        ? destinos
+        : destinos.filter(d => d.categoria === filtroActual);
+
+      // Excluir los que ya visitó
+      const visitados = getVisitados();
+      lista = lista.filter(d => !visitados[d.nombre]);
+
+      // Evitar los últimos 5 del historial
+      const historial = getHistorial();
+      const recientes = historial.slice(0, 5);
+      let disponibles = lista.filter(d => !recientes.includes(d.nombre));
+      if (disponibles.length === 0) disponibles = lista;
+
+      if (disponibles.length === 0) {
+        alert("¡Ya visitaste todos los destinos de esta categoría! 🎉");
+        return;
+      }
+
+      const destino = disponibles[Math.floor(Math.random() * disponibles.length)];
+      destinoActual = destino;
+
+      result.classList.remove("show");
+      loading.classList.add("show");
+      generateBtn.disabled = true;
+
+      setTimeout(() => {
+        resultImg.src = `images/${destino.imagen}`;
+        resultImg.alt = destino.nombre;
+        resultName.textContent = destino.nombre;
+        resultQuote.textContent = destino.frase;
+        resultCategory.textContent = destino.categoria;
+        resultTips.innerHTML = `
+          <strong>🗓 Mejor época:</strong> ${destino.epoca}<br>
+          <strong>💱 Moneda:</strong> ${destino.moneda}<br>
+          <strong>🗣 Idioma:</strong> ${destino.idioma}`;
+
+        let hist = getHistorial().filter(n => n !== destino.nombre);
+        hist.unshift(destino.nombre);
+        setHistorial(hist);
+        renderHistorial();
+        updateFavButton();
+        updateVisitButton();
+        updateStats();
+
+        loading.classList.remove("show");
+        result.classList.add("show");
+        generateBtn.disabled = false;
+      }, 700);
+    });
+
+    // ====================== FAVORITO ======================
+    favBtn.addEventListener("click", () => {
+      if (!destinoActual) return;
+      let favs = getFavoritos();
+      const nombre = destinoActual.nombre;
+      const estaba = favs.includes(nombre);
+      if (estaba) {
+        favs = favs.filter(n => n !== nombre);
+      } else {
+        favs.unshift(nombre);
+        launchPlanes();
+      }
+      setFavoritos(favs);
+      updateFavButton();
+      renderFavoritos();
+      updateStats();
+    });
+
+    // ====================== YA VIAJÉ ======================
+    visitBtn.addEventListener("click", () => {
+      if (!destinoActual) return;
+      const nombre = destinoActual.nombre;
+      const visitados = getVisitados();
+      if (visitados[nombre]) {
+        delete visitados[nombre];
+      } else {
+        visitados[nombre] = [];
+      }
+      setVisitados(visitados);
+      updateVisitButton();
+      renderVisitados();
+      updateStats();
+    });
+
+    // ====================== INICIO ======================
+    createFloatingIcons();
+    renderHistorial();
+    renderFavoritos();
+    renderVisitados();
+    updateStats();
+  </script>
+</body>
+</html>
